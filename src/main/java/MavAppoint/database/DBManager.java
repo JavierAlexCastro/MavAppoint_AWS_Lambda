@@ -56,6 +56,13 @@ public class DBManager {
 		return this.resultSet;
 	}
 	
+	public ResultSet getMajorsQuery() throws SQLException {
+		this.createConnection();
+		this.createStatement();
+		this.resultSet = this.stmt.executeQuery("SELECT * FROM major");
+		return this.resultSet;
+	}
+	
 	public void closeConnection() throws SQLException {
 		this.conn.close();
 	}
