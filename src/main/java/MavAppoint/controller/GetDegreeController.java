@@ -1,41 +1,43 @@
 package MavAppoint.controller;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import MavAppoint.database.DBManager;
+import MavAppoint.model.Degree;
 import MavAppoint.model.Department;
 
-public class GetDepartmentController {
-	
-	public GetDepartmentController() {
+public class GetDegreeController {
+
+	public GetDegreeController() {
 		
 	}
 	
-	public JSONObject getDepartments() {
+	public JSONObject getDegrees() {
 		JSONObject responseJson = new JSONObject();
         JSONObject responseBody = new JSONObject();
         JSONObject headerJson = new JSONObject();
         
         try {
         	DBManager dbmgr = DBManager.getInstance();
-        	ResultSet resultSet = dbmgr.getDepartmentsQuery();
-    		
-        	ArrayList<Department> department_list = new ArrayList<Department>();
-        	ArrayList<String> dept_name_list = new ArrayList<String>();
+        	ResultSet resultSet = dbmgr.getDegreesQuery();
         	
-    		while(resultSet.next()) {
-    			Department dept = new Department(resultSet.getString("name"));
-    			department_list.add(dept);
-    			dept_name_list.add(dept.getName());
-    		}
+        	ArrayList<Degree> degree_list = new ArrayList<Degree>();
+        	ArrayList<String> degree_name_list = new ArrayList<String>();
     		
-    		if(department_list.isEmpty()) {
-    			responseBody.put("RequestError", "No departments in DB");
+    		while(resultSet.next()) {
+    			Degree degree = new Degree(resultSet.getString("name"));
+    			degree_list.add(degree);
+    			degree_name_list.add(degree.getName());
+    		}
+    		if(degree_list.isEmpty()) {
+    			responseBody.put("RequestError", "No degree types in DB");
                 headerJson.put("custom-header", "my custom header value");
                 responseJson.put("isBase64Encoded", false);
                 responseJson.put("statusCode", 400); //bad request
@@ -43,7 +45,7 @@ public class GetDepartmentController {
                 responseJson.put("body", responseBody);
     		}else {
     			JSONArray json_array = new JSONArray();
-    			json_array.addAll(dept_name_list);
+    			json_array.addAll(degree_name_list);
         		responseBody.put("list", json_array);
                 headerJson.put("custom-header", "my custom header value");
                 responseJson.put("isBase64Encoded", false);
@@ -53,8 +55,8 @@ public class GetDepartmentController {
     		}
             resultSet.close();
             dbmgr.closeResultSet();
-        	dbmgr.closeStatement();
-        	dbmgr.closeConnection();
+            dbmgr.closeStatement();
+            dbmgr.closeConnection();
         }catch(Exception ex) {
         	headerJson.put("custom-header", "my custom header value");
             responseBody.put("ServerError", ex.toString());

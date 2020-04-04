@@ -49,6 +49,13 @@ public class DBManager {
 		return this.resultSet;
 	}
 	
+	public ResultSet getDegreesQuery() throws SQLException {
+		this.createConnection();
+		this.createStatement();
+		this.resultSet = this.stmt.executeQuery("SELECT * FROM degree_type");
+		return this.resultSet;
+	}
+	
 	public void closeConnection() throws SQLException {
 		this.conn.close();
 	}

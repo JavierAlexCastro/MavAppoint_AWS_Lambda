@@ -19,6 +19,7 @@ import org.json.simple.parser.JSONParser;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 
+import MavAppoint.controller.GetDegreeController;
 import MavAppoint.controller.GetDepartmentController;
 import MavAppoint.model.User;
 import MavAppoint.model.UserStudent;
@@ -125,51 +126,7 @@ public class App implements RequestStreamHandler {
     	LambdaLogger logger = context.getLogger();
         logger.log("Invoked mav-appoint-lambda get Departments - ");
         JSONObject responseJson = new JSONObject();
-//        JSONObject responseBody = new JSONObject();
-//        JSONObject headerJson = new JSONObject();
-//        
-//        try {
-//        	Connection conn = DriverManager.getConnection(url, db_uname, db_pass);
-//            Statement stmt = conn.createStatement();
-//            logger.log("Connected to DB");
-//            
-//    		ResultSet resultSet = stmt.executeQuery("SELECT * FROM department");
-//    		
-//    		ArrayList<String> list = new ArrayList<String>();
-//    		int row_count = 0;
-//    		while(resultSet.next()) {
-//    			list.add(resultSet.getString("name"));
-//    			row_count += 1;
-//    		}
-//    		if(row_count == 0) {
-//    			responseBody.put("RequestError", "No departments in DB");
-//                headerJson.put("custom-header", "my custom header value");
-//                responseJson.put("isBase64Encoded", false);
-//                responseJson.put("statusCode", 400); //bad request
-//                responseJson.put("headers", headerJson);
-//                responseJson.put("body", responseBody);
-//    		}else {
-//    			logger.log("Query result sucess");
-//    			JSONArray json_array = new JSONArray();
-//    			json_array.addAll(list);
-//        		responseBody.put("list", json_array);
-//                headerJson.put("custom-header", "my custom header value");
-//                responseJson.put("isBase64Encoded", false);
-//                responseJson.put("statusCode", 200); //ok
-//                responseJson.put("headers", headerJson);
-//                responseJson.put("body", responseBody);
-//    		}
-//            resultSet.close();
-//            stmt.close();
-//            conn.close();
-//        }catch(Exception ex) {
-//        	headerJson.put("custom-header", "my custom header value");
-//            responseBody.put("ServerError", ex.toString());
-//        	responseJson.put("isBase64Encoded", false);
-//            responseJson.put("statusCode", 500); //internal server error
-//            responseJson.put("headers", headerJson);
-//            responseJson.put("body", responseBody);
-//        }
+
         GetDepartmentController get_dept_controller = new GetDepartmentController();
         responseJson = get_dept_controller.getDepartments();
         
@@ -181,7 +138,6 @@ public class App implements RequestStreamHandler {
     public void getMajors(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
     	LambdaLogger logger = context.getLogger();
         logger.log("Invoked mav-appoint-lambda get Majors - ");
-        //BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         JSONObject responseJson = new JSONObject();
         JSONObject responseBody = new JSONObject();
         JSONObject headerJson = new JSONObject();
@@ -240,53 +196,55 @@ public class App implements RequestStreamHandler {
     public void getDegrees(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
     	LambdaLogger logger = context.getLogger();
         logger.log("Invoked mav-appoint-lambda get Degrees - ");
-        //BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         JSONObject responseJson = new JSONObject();
-        JSONObject responseBody = new JSONObject();
-        JSONObject headerJson = new JSONObject();
+//        JSONObject responseBody = new JSONObject();
+//        JSONObject headerJson = new JSONObject();
+//        
+//        try {
+//        	Connection conn = DriverManager.getConnection(url, db_uname, db_pass);
+//            Statement stmt = conn.createStatement();
+//            logger.log("Connected to DB");
+//            
+//    		ResultSet resultSet = stmt.executeQuery("SELECT * FROM degree_type");
+//    		
+//    		ArrayList<String> list = new ArrayList<String>();
+//    		int row_count = 0;
+//    		while(resultSet.next()) {
+//    			list.add(resultSet.getString("name"));
+//    			row_count += 1;
+//    		}
+//    		if(row_count == 0) {
+//    			responseBody.put("RequestError", "No degree types in DB");
+//                headerJson.put("custom-header", "my custom header value");
+//                responseJson.put("isBase64Encoded", false);
+//                responseJson.put("statusCode", 400); //bad request
+//                responseJson.put("headers", headerJson);
+//                responseJson.put("body", responseBody);
+//    		}else {
+//    			logger.log("Query result sucess");
+//    			JSONArray json_array = new JSONArray();
+//    			json_array.addAll(list);
+//        		responseBody.put("list", json_array);
+//                headerJson.put("custom-header", "my custom header value");
+//                responseJson.put("isBase64Encoded", false);
+//                responseJson.put("statusCode", 200); //ok
+//                responseJson.put("headers", headerJson);
+//                responseJson.put("body", responseBody);
+//    		}
+//            resultSet.close();
+//            stmt.close();
+//            conn.close();
+//        }catch(Exception ex) {
+//        	headerJson.put("custom-header", "my custom header value");
+//            responseBody.put("ServerError", ex.toString());
+//        	responseJson.put("isBase64Encoded", false);
+//            responseJson.put("statusCode", 500); //internal server error
+//            responseJson.put("headers", headerJson);
+//            responseJson.put("body", responseBody);
+//        }
         
-        try {
-        	Connection conn = DriverManager.getConnection(url, db_uname, db_pass);
-            Statement stmt = conn.createStatement();
-            logger.log("Connected to DB");
-            
-    		ResultSet resultSet = stmt.executeQuery("SELECT * FROM degree_type");
-    		
-    		ArrayList<String> list = new ArrayList<String>();
-    		int row_count = 0;
-    		while(resultSet.next()) {
-    			list.add(resultSet.getString("name"));
-    			row_count += 1;
-    		}
-    		if(row_count == 0) {
-    			responseBody.put("RequestError", "No degree types in DB");
-                headerJson.put("custom-header", "my custom header value");
-                responseJson.put("isBase64Encoded", false);
-                responseJson.put("statusCode", 400); //bad request
-                responseJson.put("headers", headerJson);
-                responseJson.put("body", responseBody);
-    		}else {
-    			logger.log("Query result sucess");
-    			JSONArray json_array = new JSONArray();
-    			json_array.addAll(list);
-        		responseBody.put("list", json_array);
-                headerJson.put("custom-header", "my custom header value");
-                responseJson.put("isBase64Encoded", false);
-                responseJson.put("statusCode", 200); //ok
-                responseJson.put("headers", headerJson);
-                responseJson.put("body", responseBody);
-    		}
-            resultSet.close();
-            stmt.close();
-            conn.close();
-        }catch(Exception ex) {
-        	headerJson.put("custom-header", "my custom header value");
-            responseBody.put("ServerError", ex.toString());
-        	responseJson.put("isBase64Encoded", false);
-            responseJson.put("statusCode", 500); //internal server error
-            responseJson.put("headers", headerJson);
-            responseJson.put("body", responseBody);
-        }
+        GetDegreeController get_degree_controller = new GetDegreeController();
+        responseJson = get_degree_controller.getDegrees();
         
         OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
         writer.write(responseJson.toString());
