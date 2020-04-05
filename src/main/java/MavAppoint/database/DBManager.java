@@ -2,9 +2,13 @@ package MavAppoint.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import MavAppoint.model.User;
+import MavAppoint.model.UserStudent;
 
 public class DBManager {
 	
@@ -17,6 +21,7 @@ public class DBManager {
 	private Connection conn;
 	private Statement stmt;
 	private ResultSet resultSet;
+	private PreparedStatement preparedStmt;
 	
 	private DBManager() throws SQLException {
 		DBManager.db_host = System.getenv("DB_HOST");
@@ -26,8 +31,7 @@ public class DBManager {
 	}
 	
 	//singleton
-	public static DBManager getInstance() throws SQLException 
-    { 
+	public static DBManager getInstance() throws SQLException { 
         if (dbmgr_instance == null) 
             dbmgr_instance = new DBManager(); 
   
@@ -63,6 +67,57 @@ public class DBManager {
 		return this.resultSet;
 	}
 	
+	public int insertUserQuery(User user) throws SQLException {
+		String user_sql = "INSERT INTO `user` (email, password, role, validated, notification) VALUES (?,?,?,?,?)";
+		this.preparedStmt = conn.prepareStatement(user_sql);
+		this.preparedStmt.setString(1, user.getEmail());
+		this.preparedStmt.setString(2, user.getHashedPassword());
+		this.preparedStmt.setString(3, user.getRole());
+		this.preparedStmt.setInt(4, user.getValidated());
+		this.preparedStmt.setString(5, user.getNotification());
+		return this.preparedStmt.executeUpdate();
+	}
+	
+	public ResultSet getUserId(String email) throws SQLException  {
+		this.resultSet = this.stmt.executeQuery("SELECT userId FROM `user` WHERE email='"+ email +"\'");
+		return this.resultSet;
+	}
+	
+	public int insertUserStudentQuery(UserStudent student) throws SQLException {
+		String student_sql = "INSERT INTO `user_student` (userId, student_Id, degree_type, phone_num, last_name_initial) VALUES (?,?,?,?,?)";
+		this.preparedStmt = conn.prepareStatement(student_sql);
+		this.preparedStmt.setInt(1, student.getId());
+		this.preparedStmt.setString(2, student.getStudent_id());
+		this.preparedStmt.setInt(3, student.getDegree_type());
+		this.preparedStmt.setString(4, student.getPhone());
+		this.preparedStmt.setString(5, student.getLast_name_initial());
+		return this.preparedStmt.executeUpdate();
+	}
+	
+	public int insertDepartmentUserQuery(String dept, int id) throws SQLException {
+		String department_sql = "INSERT INTO `department_user` (name, userId) VALUES (?,?)";
+		this.preparedStmt = conn.prepareStatement(department_sql);
+		this.preparedStmt.setString(1, dept);
+		this.preparedStmt.setInt(2, id);
+		return this.preparedStmt.executeUpdate();
+	}
+	
+	public int insertDegreeTypeUserQuery(String degree, int id) throws SQLException {
+		String degree_sql = "INSERT INTO `degree_type_user` (name, userId) VALUES (?,?)";
+		this.preparedStmt = conn.prepareStatement(degree_sql);
+		this.preparedStmt.setString(1, degree);
+		this.preparedStmt.setInt(2, id);
+		return this.preparedStmt.executeUpdate();
+	}
+	
+	public int insertMajorUserQuery(String major, int id) throws SQLException {
+		String major_sql = "INSERT INTO `major_user` (name, userId) VALUES (?,?)";
+		this.preparedStmt = conn.prepareStatement(major_sql);
+		this.preparedStmt.setString(1, major);
+		this.preparedStmt.setInt(2, id);
+		return this.preparedStmt.executeUpdate();
+	}
+	
 	public void closeConnection() throws SQLException {
 		this.conn.close();
 	}
@@ -73,6 +128,10 @@ public class DBManager {
 	
 	public void closeStatement() throws SQLException {
 		this.stmt.close();
+	}
+	
+	public void closePreparedStatement() throws SQLException {
+		this.preparedStmt.close();
 	}
 
 }

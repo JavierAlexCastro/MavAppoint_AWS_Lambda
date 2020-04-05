@@ -43,10 +43,10 @@ public class GetMajorController {
     			major_and_dept_list.add(Arrays.asList(inner_dept_array));
     		}
     		if(major_list.isEmpty()) {
-    			responseBody.put("RequestError", "No departments in DB");
+    			responseBody.put("Error", "No departments in DB");
                 headerJson.put("custom-header", "my custom header value");
                 responseJson.put("isBase64Encoded", false);
-                responseJson.put("statusCode", 400); //bad request
+                responseJson.put("statusCode", 204); //no content
                 responseJson.put("headers", headerJson);
                 responseJson.put("body", responseBody);
     		}else {
@@ -65,7 +65,7 @@ public class GetMajorController {
             dbmgr.closeConnection();
         }catch(Exception ex) {
         	headerJson.put("custom-header", "my custom header value");
-            responseBody.put("ServerError", ex.toString());
+            responseBody.put("Error", ex.toString());
         	responseJson.put("isBase64Encoded", false);
             responseJson.put("statusCode", 500); //internal server error
             responseJson.put("headers", headerJson);
