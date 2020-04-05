@@ -207,5 +207,80 @@ public class PostStudentController {
         client.sendEmail(request);
 
 	}
+	
+//	public void sendSMTPEmail(User user) throws Exception{
+//		System.out.println("Sending email to user: " + user.getEmail());
+//		String email_subject = "MavAppoint New Account Info";
+//	    String email_body = String.join(
+//	    	    System.getProperty("line.separator"),
+//	    	    "<html>",
+//                "<head></head>",
+//                "<body>",
+//                "<h3>Hello UTA student,</h3>",
+//                "<p>You recently created a MavAppoint account. <br /> ",
+//                "Here is your randomly generated password: <br />",
+//                "<br />",
+//                user.getPassword(),
+//                "<br />",
+//                "<br />",
+//                "The University of Texas at Arlington",
+//                "<br />",
+//                "MavAppoint System",
+//                "<ber />",
+//                "This message was sent automatically by Amazon's Simple Email Service",
+//                "</p>",
+//                "</body>",
+//                "</html>"
+//	    	);
+//	    // Create a Properties object to contain connection configuration information.
+//	    Properties props = System.getProperties();
+//    	props.put("mail.transport.protocol", "smtps");
+//    	props.put("mail.smtps.port", smtp_port);
+//    	props.put("mail.smtp.ssl.enable", "true");
+//    	props.put("mail.smtps.auth", "true");
+//    	props.put("mail.debug", "true");
+//    	
+//
+//    	
+//    	// Create a Session object to represent a mail session with the specified properties. 
+//    	Session session = Session.getDefaultInstance(props);
+//    	
+//    	// Used to debug SMTP issues
+//        session.setDebug(true);
+//
+//        // Create a message with the specified information. 
+//        MimeMessage msg = new MimeMessage(session);
+//        msg.setFrom(new InternetAddress(email_from, email_from_name));
+//        msg.setRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+//        msg.setSubject(email_subject);
+//        msg.setContent(email_body,"text/html");
+//        
+//        // Create a transport.
+//        Transport transport = session.getTransport("smtps");
+//                    
+//        // Send the message.
+//        try
+//        {
+//            System.out.println("Sending email....");
+//            System.out.println("Transport isConnected: " + transport.isConnected());
+//            // Connect to Amazon SES using the SMTP username and password you specified above.
+//            transport.connect(smtp_host, smtp_user, smtp_pass);
+//            System.out.println("Connected...");
+//            // Send the email.
+//            System.out.println("Recipient count" + msg.getAllRecipients().length);
+//            transport.sendMessage(msg, msg.getAllRecipients());
+//            System.out.println("Email sent!");
+//        }
+//        catch (Exception ex) {
+//            System.out.println("The email was not sent.");
+//            System.out.println("Error message: " + ex.getMessage());
+//            throw ex;
+//        }
+//        finally
+//        {
+//            // Close and terminate the connection.
+//            transport.close();
+//        }
+//	}
 
 }

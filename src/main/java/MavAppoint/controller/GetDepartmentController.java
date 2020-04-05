@@ -1,7 +1,6 @@
 package MavAppoint.controller;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
@@ -18,8 +17,6 @@ public class GetDepartmentController {
 	
 	public JSONObject getDepartments() {
 		JSONObject responseJson = new JSONObject();
-        JSONObject responseBody = new JSONObject();
-        JSONObject headerJson = new JSONObject();
         
         try {
         	DBManager dbmgr = DBManager.getInstance();
@@ -35,34 +32,51 @@ public class GetDepartmentController {
     		}
     		
     		if(department_list.isEmpty()) {
-    			responseBody.put("Error", "No departments in DB");
-                headerJson.put("custom-header", "my custom header value");
-                responseJson.put("isBase64Encoded", false);
-                responseJson.put("statusCode", 204); //no content
-                responseJson.put("headers", headerJson);
-                responseJson.put("body", responseBody);
+    			responseJson = formResponse("Error", "No departments in DB", 204); //no content
     		}else {
-    			JSONArray json_array = new JSONArray();
-    			json_array.addAll(dept_name_list);
-        		responseBody.put("list", json_array);
-                headerJson.put("custom-header", "my custom header value");
-                responseJson.put("isBase64Encoded", false);
-                responseJson.put("statusCode", 200); //ok
-                responseJson.put("headers", headerJson);
-                responseJson.put("body", responseBody);
+    			responseJson = formResponse("list", dept_name_list, 200); //ok
     		}
             resultSet.close();
             dbmgr.closeResultSet();
         	dbmgr.closeStatement();
         	dbmgr.closeConnection();
         }catch(Exception ex) {
-        	headerJson.put("custom-header", "my custom header value");
-            responseBody.put("Error", ex.toString());
-        	responseJson.put("isBase64Encoded", false);
-            responseJson.put("statusCode", 500); //internal server error
-            responseJson.put("headers", headerJson);
-            responseJson.put("body", responseBody);
+        	responseJson = formResponse("Error", ex.toString(), 500); //internal server error
         }
+        
+        return responseJson;
+	}
+	
+	//for success - returning a JSONArray
+	private JSONObject formResponse(String label, ArrayList<String> list, int code) {
+		JSONObject responseJson = new JSONObject();
+        JSONObject responseBody = new JSONObject();
+        JSONObject headerJson = new JSONObject();
+        
+        JSONArray json_array = new JSONArray();
+		json_array.addAll(list);
+		responseBody.put(label, json_array);
+        headerJson.put("custom-header", "my custom header value");
+        responseJson.put("isBase64Encoded", false);
+        responseJson.put("statusCode", code);
+        responseJson.put("headers", headerJson);
+        responseJson.put("body", responseBody);
+        
+        return responseJson;
+	}
+	
+	//for errors - returning an error message
+	private JSONObject formResponse(String label, String msg, int code) {
+		JSONObject responseJson = new JSONObject();
+        JSONObject responseBody = new JSONObject();
+        JSONObject headerJson = new JSONObject();
+        
+        headerJson.put("custom-header", "my custom header value");
+        responseBody.put(label, msg);
+    	responseJson.put("isBase64Encoded", false);
+        responseJson.put("statusCode", code);
+        responseJson.put("headers", headerJson);
+        responseJson.put("body", responseBody);
         
         return responseJson;
 	}
