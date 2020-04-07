@@ -118,6 +118,32 @@ public class DBManager {
 		return this.preparedStmt.executeUpdate();
 	}
 	
+	public ResultSet getUserPasswordQuery(String email) throws SQLException {
+		this.resultSet = this.stmt.executeQuery("SELECT password FROM `user` WHERE email='" + email + "\'");
+		return this.resultSet;
+	}
+	
+	public ResultSet getUserFromEmailQuery(String email) throws SQLException {
+		this.resultSet = this.stmt.executeQuery("SELECT * FROM `user` WHERE email='" + email + "\'");
+		return this.resultSet;
+	}
+	
+	public ResultSet getStudentFromIdQuery(int id) throws SQLException {
+		String student_sql = "SELECT * FROM `user_student` WHERE userId=?";
+		this.preparedStmt = conn.prepareStatement(student_sql);
+		this.preparedStmt.setInt(1, id);
+		this.resultSet = this.preparedStmt.executeQuery();
+		return this.resultSet;
+	}
+	
+	public ResultSet getAdvisorFromIdQuery(int id) throws SQLException {
+		String student_sql = "SELECT * FROM `user_advisor` WHERE userId=?";
+		this.preparedStmt = conn.prepareStatement(student_sql);
+		this.preparedStmt.setInt(1, id);
+		this.resultSet = this.preparedStmt.executeQuery();
+		return this.resultSet;
+	}
+	
 	public void closeConnection() throws SQLException {
 		this.conn.close();
 	}

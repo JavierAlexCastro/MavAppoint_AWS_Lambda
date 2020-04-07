@@ -17,6 +17,7 @@ import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import MavAppoint.database.DBManager;
 import MavAppoint.model.User;
 import MavAppoint.model.UserStudent;
+import MavAppoint.util.Util;
 
 public class PostStudentController {
 	private static String aws_cred_public;
@@ -34,79 +35,84 @@ public class PostStudentController {
         
         try {
         	if(checkRequestBody(event)) {
-        		User user = new User((String) event.get("email"), "student");
         		
-        		DBManager dbmgr = DBManager.getInstance();
-        		dbmgr.createConnection();
-        		
-        		//insert user --------------------------------
-        		int insert_user_result = dbmgr.insertUserQuery(user);
-        		if(insert_user_result > 0) {
-        			dbmgr.closePreparedStatement();
-        			String degree = (String) event.get("degree");
-            		int degree_type = getDegreeType(degree);
-            		UserStudent student = new UserStudent(0,(String)event.get("student_id"), degree_type, (String)event.get("phone"), (String)event.get("initial"));
-            		
-            		//get user id --------------------------------
-            		dbmgr.createStatement();
-            		ResultSet resultSetUserId = dbmgr.getUserId(user.getEmail());
-            		if(resultSetUserId.next()) {
-            			student.setId(resultSetUserId.getInt("userId"));
-            			dbmgr.closeResultSet();
-            			dbmgr.closeStatement();
-            			
-            			//insert student --------------------------------
-            			int insert_student_result = dbmgr.insertUserStudentQuery(student);
-            			if(insert_student_result > 0) {
-            				dbmgr.closePreparedStatement();
-            				
-            				//insert department user --------------------------------
-            				int insert_dept_result = dbmgr.insertDepartmentUserQuery((String) event.get("department"), student.getId());
-            				if(insert_dept_result > 0) {
-            					dbmgr.closePreparedStatement();
-            					
-            					//insert degree user --------------------------------
-            					int insert_degree_result = dbmgr.insertDegreeTypeUserQuery(degree, student.getId());
-            					if(insert_degree_result > 0) {
-            						dbmgr.closePreparedStatement();
-            						
-            						//insert major user --------------------------------
-            						int insert_major_result = dbmgr.insertMajorUserQuery((String) event.get("major"), student.getId());
-            						if(insert_major_result > 0) {
-            							dbmgr.closePreparedStatement();
-            							dbmgr.closeConnection();
-            							
-            							//everything succeeded
-            							//send email with password --------------------------------
-            							sendSDKEmail(user); //comment out when NAT Gateway disabled
-            							responseJson = formResponse("Success", true, 200); //ok
-            							
-            						}else {
-            							responseJson = formResponse("Error", "Query for major user insertion failed", 500); //internal server error
-                    					dbmgr.closeConnection();
-            						}
-            					}else {
-            						responseJson = formResponse("Error", "Query for degree type user insertion failed", 500); //internal server error
-                					dbmgr.closeConnection();
-            					}
-            				}else {
-            					responseJson = formResponse("Error", "Query for department user insertion failed", 500); //internal server error
-            					dbmgr.closeConnection();
-            				}
-            			}else {
-            				responseJson = formResponse("Error", "Query for student insertion failed", 500); //internal server error
-            				dbmgr.closeConnection();
-            			}
-            		}else {
-            			responseJson = formResponse("Error", "Query for user id retrieval failed", 500); //internal server error
-            			dbmgr.closeConnection();
-            		}
-        		}else {
-        			responseJson = formResponse("Error", "Query for user insertion failed", 500); //internal server error
-        			dbmgr.closeConnection();
-        		}
+        		if(Util.validateEmail((String) event.get("email")) && Util.validatePhoneNumber((String) event.get("phone")) && Util.validateStudentId((String) event.get("student_id"))) {
+	        		User user = new User((String) event.get("email"), "student");
+	        		
+	        		DBManager dbmgr = DBManager.getInstance();
+	        		dbmgr.createConnection();
+	        		
+	        		//insert user --------------------------------
+	        		int insert_user_result = dbmgr.insertUserQuery(user);
+	        		if(insert_user_result > 0) {
+	        			dbmgr.closePreparedStatement();
+	        			String degree = (String) event.get("degree");
+	            		int degree_type = getDegreeType(degree);
+	            		UserStudent student = new UserStudent(0,(String)event.get("student_id"), degree_type, (String)event.get("phone"), (String)event.get("initial"));
+	            		
+	            		//get user id --------------------------------
+	            		dbmgr.createStatement();
+	            		ResultSet resultSetUserId = dbmgr.getUserId(user.getEmail());
+	            		if(resultSetUserId.next()) {
+	            			student.setId(resultSetUserId.getInt("userId"));
+	            			dbmgr.closeResultSet();
+	            			dbmgr.closeStatement();
+	            			
+	            			//insert student --------------------------------
+	            			int insert_student_result = dbmgr.insertUserStudentQuery(student);
+	            			if(insert_student_result > 0) {
+	            				dbmgr.closePreparedStatement();
+	            				
+	            				//insert department user --------------------------------
+	            				int insert_dept_result = dbmgr.insertDepartmentUserQuery((String) event.get("department"), student.getId());
+	            				if(insert_dept_result > 0) {
+	            					dbmgr.closePreparedStatement();
+	            					
+	            					//insert degree user --------------------------------
+	            					int insert_degree_result = dbmgr.insertDegreeTypeUserQuery(degree, student.getId());
+	            					if(insert_degree_result > 0) {
+	            						dbmgr.closePreparedStatement();
+	            						
+	            						//insert major user --------------------------------
+	            						int insert_major_result = dbmgr.insertMajorUserQuery((String) event.get("major"), student.getId());
+	            						if(insert_major_result > 0) {
+	            							dbmgr.closePreparedStatement();
+	            							dbmgr.closeConnection();
+	            							
+	            							//everything succeeded
+	            							//send email with password --------------------------------
+	            							sendSDKEmail(user); //comment out when NAT Gateway disabled
+	            							responseJson = formResponse("Success", true, 200); //ok
+	            							
+	            						}else {
+	            							responseJson = formResponse("Error", "Query for major user insertion failed", 500); //internal server error
+	                    					dbmgr.closeConnection();
+	            						}
+	            					}else {
+	            						responseJson = formResponse("Error", "Query for degree type user insertion failed", 500); //internal server error
+	                					dbmgr.closeConnection();
+	            					}
+	            				}else {
+	            					responseJson = formResponse("Error", "Query for department user insertion failed", 500); //internal server error
+	            					dbmgr.closeConnection();
+	            				}
+	            			}else {
+	            				responseJson = formResponse("Error", "Query for student insertion failed", 500); //internal server error
+	            				dbmgr.closeConnection();
+	            			}
+	            		}else {
+	            			responseJson = formResponse("Error", "Query for user id retrieval failed", 500); //internal server error
+	            			dbmgr.closeConnection();
+	            		}
+	        		}else {
+	        			responseJson = formResponse("Error", "Query for user insertion failed", 500); //internal server error
+	        			dbmgr.closeConnection();
+	        		}
+	        	}else {
+	        		responseJson = formResponse("Error", "Expected request body arguments not found", 400); //bad request
+	        	}
         	}else {
-        		responseJson = formResponse("Error", "Expected request body arguments not found", 400); //bad request
+        		responseJson = formResponse("Error", "Input validation failed, please check Email, Phone or ID", 400); //bad request
         	}
         	
         }catch(Exception ex) {

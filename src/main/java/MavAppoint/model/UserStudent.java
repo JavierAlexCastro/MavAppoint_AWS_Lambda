@@ -1,5 +1,8 @@
 package MavAppoint.model;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class UserStudent {
 	
 	private int id;
@@ -14,6 +17,14 @@ public class UserStudent {
 		this.degree_type = degree_type;
 		this.phone = phone;
 		this.last_name_initial = last_name_initial;
+	}
+	
+	public UserStudent(ResultSet resultSet) throws SQLException {
+		this.id = resultSet.getInt("userId");
+		this.student_id = resultSet.getString("student_Id");
+		this.degree_type = resultSet.getInt("degree_type");
+		this.phone = resultSet.getString("phone_num");
+		this.last_name_initial = resultSet.getString("last_name_initial");
 	}
 
 	public int getId() {

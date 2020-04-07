@@ -1,10 +1,13 @@
 package MavAppoint.model;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import MavAppoint.password.HashPassword;
 import MavAppoint.password.RandomPasswordGenerator;
 
 public class User {
-	//private String user_id = null;
+	private int user_id;
 	private String email;
 	private String password;
 	private String hashed_password;
@@ -19,6 +22,23 @@ public class User {
 		this.role = role;
 		this.validated = 0; //default to not validated on creation
 		this.notification = "false"; //default to not notify on creation
+	}
+	
+	public User(ResultSet resultSet) throws SQLException {
+		this.user_id = resultSet.getInt("userId");
+		this.email = resultSet.getString("email");
+		this.hashed_password = resultSet.getString("password");
+		this.role = resultSet.getString("role");
+		this.validated = resultSet.getInt("validated");
+		this.notification = resultSet.getString("notification");
+	}
+	
+	public int getUser_id() {
+		return this.user_id;
+	}
+	
+	public void setUser_id(int user_id) {
+		this.user_id = user_id;
 	}
 
 	public String getEmail() {
