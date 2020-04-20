@@ -67,18 +67,22 @@ public class PostUserLoginController {
 										dbmgr.closePreparedStatement();
 										dbmgr.closeConnection();
 		            				}else {
-		            					responseJson = formResponse("Error", "Query for retrieving student failed", 500); //internal server error
+		            					responseJson = formResponse("Error", "Query for retrieving advisor failed", 500); //internal server error
 										dbmgr.closePreparedStatement();
 										dbmgr.closeConnection();
 		            				}
-								//unknown role -------------
+								//admin role - user info only -------------
+		            			}else if(user.getRole().equals("admin")) {
+		            				responseJson = formResponse(user, 200); //ok
+		            				dbmgr.closeConnection();
+		            			//unknown role
 		            			}else {
-		            				responseJson = formResponse("Error", "Invalid role", 500); //internal server error
+		            				responseJson = formResponse("Error", "Invalid role - not student, not advisor, not admin", 500); //internal server error
 		            				dbmgr.closeStatement();
 									dbmgr.closeConnection();
 		            			}
 							}else {
-								responseJson = formResponse("Error", "Query for retrieving user failed", 500); //internal server error
+								responseJson = formResponse("Error", "Query for retrieving user info failed", 500); //internal server error
 								dbmgr.closeStatement();
 								dbmgr.closeConnection();
 							}
@@ -88,7 +92,8 @@ public class PostUserLoginController {
 							dbmgr.closeConnection();
 						}
 					}else {
-						responseJson = formResponse("Error", "Query for credentials check failed", 500); //internal server error
+						responseJson = formResponse("Error", "Credentials do not match", 409); //conflict
+						//responseJson = formResponse("Error", "Query for credentials check failed", 500); //internal server error
 						dbmgr.closeStatement();
 						dbmgr.closeConnection();
 					}
@@ -125,7 +130,7 @@ public class PostUserLoginController {
         return responseJson;
 	}
 	
-	//for success where msg is Student
+	//for success where role is Student
 	private JSONObject formResponse(User user, UserStudent student, int code) {
 		JSONObject responseJson = new JSONObject();
         JSONObject responseBody = new JSONObject();
@@ -149,7 +154,7 @@ public class PostUserLoginController {
         return responseJson;
 	}
 	
-	//for success where msg is Advisor
+	//for success where role is Advisor
 	private JSONObject formResponse(User user, UserAdvisor advisor, int code) {
 		JSONObject responseJson = new JSONObject();
         JSONObject responseBody = new JSONObject();
@@ -168,6 +173,26 @@ public class PostUserLoginController {
         responseBody.put("name_low", advisor.getName_low());
         responseBody.put("degree_types", advisor.getDegree_types());
         responseBody.put("lead_status", advisor.getLead_status());
+    	responseJson.put("isBase64Encoded", false);
+        responseJson.put("statusCode", code);
+        responseJson.put("headers", headerJson);
+        responseJson.put("body", responseBody);
+        
+        return responseJson;
+	}
+	
+	//for success where role is admin
+	private JSONObject formResponse(User user, int code) {
+		JSONObject responseJson = new JSONObject();
+        JSONObject responseBody = new JSONObject();
+        JSONObject headerJson = new JSONObject();
+        
+        headerJson.put("custom-header", "my custom header value");
+        responseBody.put("id", user.getUser_id());
+        responseBody.put("email", user.getEmail());
+        responseBody.put("role", user.getRole());
+        responseBody.put("validated", user.getValidated());
+        responseBody.put("notification", user.getNotification());
     	responseJson.put("isBase64Encoded", false);
         responseJson.put("statusCode", code);
         responseJson.put("headers", headerJson);
