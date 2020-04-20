@@ -11,6 +11,7 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import MavAppoint.controller.GetDegreeController;
 import MavAppoint.controller.GetDepartmentController;
 import MavAppoint.controller.GetMajorController;
+import MavAppoint.controller.PostAdvisorController;
 import MavAppoint.controller.PostStudentController;
 import MavAppoint.controller.PostUserLoginController;
 
@@ -105,6 +106,32 @@ public class App implements RequestStreamHandler {
 			responseJson.put("headers", headerJson);
 			responseJson.put("body", responseBody);
         }
+        
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
+        writer.write(responseJson.toString());
+        writer.close();
+	}
+
+	public void postUserAdvisor(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
+		LambdaLogger logger = context.getLogger();
+        logger.log("Invoked mav-appoint-lambda post Advisor - ");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        JSONObject responseJson = new JSONObject();
+        JSONObject responseBody = new JSONObject();
+        JSONObject headerJson = new JSONObject();
+        
+        try {
+			JSONObject event = (JSONObject) parser.parse(reader);
+			PostAdvisorController post_advisor_controller = new PostAdvisorController();
+			responseJson = post_advisor_controller.createAdvisor(event);
+		} catch (ParseException ex) {
+			headerJson.put("custom-header", "my custom header value");
+			responseBody.put("Error", ex.toString());
+			responseJson.put("isBase64Encoded", false);
+			responseJson.put("statusCode", 500); //internal server error
+			responseJson.put("headers", headerJson);
+			responseJson.put("body", responseBody);
+		}
         
         OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
         writer.write(responseJson.toString());

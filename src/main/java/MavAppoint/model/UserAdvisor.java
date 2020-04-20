@@ -12,14 +12,14 @@ public class UserAdvisor {
 	private int degree_types;
 	private int lead_status;
 	
-	public UserAdvisor(int id, String pName, String notification, String name_low, String name_high, int degree_types, int lead_status) {
+	public UserAdvisor(int id, String pName) {
 		this.id = id;
 		this.pName = pName;
-		this.notification = notification;
-		this.name_low = name_low;
-		this.name_high = name_high;
-		this.degree_types = degree_types;
-		this.lead_status = lead_status;
+		this.notification = "day"; //hardcoded due to lack of info
+		this.name_low = "A"; //hardcoded due to lack of info
+		this.name_high = "Z"; //hardcoded due to lack of info
+		this.degree_types = 7; //hardcoded due to lack of info
+		this.lead_status = 1; //hardcoded due to lack of info
 	}
 	
 	public UserAdvisor(ResultSet resultSet) throws SQLException {

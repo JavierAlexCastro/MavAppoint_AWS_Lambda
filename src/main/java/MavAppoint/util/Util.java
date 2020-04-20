@@ -14,6 +14,10 @@ public class Util {
 		return studentId.matches("^100\\d{7}") || studentId.matches("^6000\\d{6}");
 	}
 	
+	public static boolean validateName(String name) {
+		return name.matches("^[a-zA-Z. _-]{1,32}$");
+	}
+	
 	public static String addTime(String hour, String minute, int add){
 		String result = "";
 		try{

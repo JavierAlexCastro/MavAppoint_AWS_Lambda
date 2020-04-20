@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import MavAppoint.model.User;
+import MavAppoint.model.UserAdvisor;
 import MavAppoint.model.UserStudent;
 
 public class DBManager {
@@ -91,6 +92,19 @@ public class DBManager {
 		this.preparedStmt.setInt(3, student.getDegree_type());
 		this.preparedStmt.setString(4, student.getPhone());
 		this.preparedStmt.setString(5, student.getLast_name_initial());
+		return this.preparedStmt.executeUpdate();
+	}
+	
+	public int insertUserAdvisorQuery(UserAdvisor advisor) throws SQLException {
+		String student_sql = "INSERT INTO `user_advisor` (userId, pName, notification, name_low, name_high, degree_types, lead_status) VALUES (?,?,?,?,?,?,?)";
+		this.preparedStmt = conn.prepareStatement(student_sql);
+		this.preparedStmt.setInt(1, advisor.getId());
+		this.preparedStmt.setString(2, advisor.getpName());
+		this.preparedStmt.setString(3, advisor.getNotification());
+		this.preparedStmt.setString(4, advisor.getName_low());
+		this.preparedStmt.setString(5, advisor.getName_high());
+		this.preparedStmt.setInt(6,  advisor.getDegree_types());
+		this.preparedStmt.setInt(7, advisor.getLead_status());
 		return this.preparedStmt.executeUpdate();
 	}
 	

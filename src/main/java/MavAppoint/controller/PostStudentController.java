@@ -81,38 +81,45 @@ public class PostStudentController {
 	            							
 	            							//everything succeeded
 	            							//send email with password --------------------------------
-	            							sendSDKEmail(user); //comment out when NAT Gateway disabled
+	            							//sendSDKEmail(user); //comment out when NAT Gateway disabled
 	            							responseJson = formResponse("Success", true, 200); //ok
 	            							
 	            						}else {
 	            							responseJson = formResponse("Error", "Query for major user insertion failed", 500); //internal server error
+	            							dbmgr.closePreparedStatement();
 	                    					dbmgr.closeConnection();
 	            						}
 	            					}else {
 	            						responseJson = formResponse("Error", "Query for degree type user insertion failed", 500); //internal server error
+	            						dbmgr.closePreparedStatement();
 	                					dbmgr.closeConnection();
 	            					}
 	            				}else {
 	            					responseJson = formResponse("Error", "Query for department user insertion failed", 500); //internal server error
+	            					dbmgr.closePreparedStatement();
 	            					dbmgr.closeConnection();
 	            				}
 	            			}else {
 	            				responseJson = formResponse("Error", "Query for student insertion failed", 500); //internal server error
+	            				dbmgr.closePreparedStatement();
 	            				dbmgr.closeConnection();
 	            			}
 	            		}else {
 	            			responseJson = formResponse("Error", "Query for user id retrieval failed", 500); //internal server error
+	            			dbmgr.closeResultSet();
+	            			dbmgr.closeStatement();
 	            			dbmgr.closeConnection();
 	            		}
 	        		}else {
 	        			responseJson = formResponse("Error", "Query for user insertion failed", 500); //internal server error
+	        			dbmgr.closePreparedStatement();
 	        			dbmgr.closeConnection();
 	        		}
 	        	}else {
-	        		responseJson = formResponse("Error", "Expected request body arguments not found", 400); //bad request
+	        		responseJson = formResponse("Error", "Input validation failed, please check Email, Phone or ID", 400); //bad request
 	        	}
         	}else {
-        		responseJson = formResponse("Error", "Input validation failed, please check Email, Phone or ID", 400); //bad request
+        		responseJson = formResponse("Error", "Expected request body arguments not found", 400); //bad request
         	}
         	
         }catch(Exception ex) {
