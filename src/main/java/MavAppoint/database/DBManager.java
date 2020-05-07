@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Date;
 
 import MavAppoint.model.User;
 import MavAppoint.model.UserAdvisor;
@@ -153,6 +154,23 @@ public class DBManager {
 	public ResultSet getAdvisorFromIdQuery(int id) throws SQLException {
 		String student_sql = "SELECT * FROM `user_advisor` WHERE userId=?";
 		this.preparedStmt = conn.prepareStatement(student_sql);
+		this.preparedStmt.setInt(1, id);
+		this.resultSet = this.preparedStmt.executeQuery();
+		return this.resultSet;
+	}
+	
+	public ResultSet getAdvisingScheduleQuery(java.util.Date date) throws SQLException {
+		String schedule_sql = "SELECT * FROM `advising_schedule` WHERE date=?";
+		Date sql_date = new Date(date.getTime()); //may give an error
+		this.preparedStmt = conn.prepareStatement(schedule_sql);
+		this.preparedStmt.setDate(1, sql_date);
+		this.resultSet = this.preparedStmt.executeQuery();
+		return this.resultSet;
+	}
+	
+	public ResultSet getAdvisorDepartmentQuery(int id) throws SQLException {
+		String advisor_dept_sql = "SELECT * FROM `department_user` WHERE userId=?";
+		this.preparedStmt = conn.prepareStatement(advisor_dept_sql);
 		this.preparedStmt.setInt(1, id);
 		this.resultSet = this.preparedStmt.executeQuery();
 		return this.resultSet;

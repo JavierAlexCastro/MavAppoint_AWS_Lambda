@@ -45,7 +45,7 @@ public class PostAdvisorController {
 	        		if(insert_user_result > 0) {
 	        			dbmgr.closePreparedStatement();
 	        			
-	        			UserAdvisor advisor = new UserAdvisor(0, (String) event.get("name"));
+	        			UserAdvisor advisor = new UserAdvisor(0, (String) event.get("name"), (String) event.get("department"));
 	        			//get user id --------------------------------
 	            		dbmgr.createStatement();
 	            		ResultSet resultSetUserId = dbmgr.getUserId(user.getEmail());
@@ -60,7 +60,7 @@ public class PostAdvisorController {
 	            				dbmgr.closePreparedStatement();
 	            				
 	            				//insert department user --------------------------------
-	            				int insert_dept_result = dbmgr.insertDepartmentUserQuery((String) event.get("department"), advisor.getId());
+	            				int insert_dept_result = dbmgr.insertDepartmentUserQuery(advisor.getDepartment(), advisor.getId());
 	            				if(insert_dept_result > 0) {
 	            					dbmgr.closePreparedStatement();
 	            					dbmgr.closeConnection();

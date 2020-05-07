@@ -8,6 +8,7 @@ import org.json.simple.parser.ParseException;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 
+import MavAppoint.controller.GetAdvisingScheduleController;
 import MavAppoint.controller.GetDegreeController;
 import MavAppoint.controller.GetDepartmentController;
 import MavAppoint.controller.GetMajorController;
@@ -137,6 +138,59 @@ public class App implements RequestStreamHandler {
         writer.write(responseJson.toString());
         writer.close();
 	}
+	
+	public void getAdvisingSchedule(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
+		LambdaLogger logger = context.getLogger();
+        logger.log("Invoked mav-appoint-lambda get Advising Schedule - ");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        JSONObject responseJson = new JSONObject();
+        JSONObject responseBody = new JSONObject();
+        JSONObject headerJson = new JSONObject();
+        
+        try {
+        	JSONObject event = (JSONObject) parser.parse(reader);
+        	GetAdvisingScheduleController get_advising_schedule_controller = new GetAdvisingScheduleController();
+        	responseJson = get_advising_schedule_controller.getSchedule(event);
+        }catch (ParseException ex) {
+        	headerJson.put("custom-header", "my custom header value");
+			responseBody.put("Error", ex.toString());
+			responseJson.put("isBase64Encoded", false);
+			responseJson.put("statusCode", 500); //internal server error
+			responseJson.put("headers", headerJson);
+			responseJson.put("body", responseBody);
+        }
+        
+		
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
+        writer.write(responseJson.toString());
+        writer.close();
+	}
+	
+	public void postAppointment(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
+    	LambdaLogger logger = context.getLogger();
+        logger.log("Invoked mav-appoint-lambda post Appointment - ");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        JSONObject responseJson = new JSONObject();
+        JSONObject responseBody = new JSONObject();
+        JSONObject headerJson = new JSONObject();
+        
+        try {
+			JSONObject event = (JSONObject) parser.parse(reader);
+			PostStudentController post_student_controller = new PostStudentController();
+			responseJson = post_student_controller.registerStudent(event);
+		} catch (ParseException ex) {
+			headerJson.put("custom-header", "my custom header value");
+			responseBody.put("Error", ex.toString());
+			responseJson.put("isBase64Encoded", false);
+			responseJson.put("statusCode", 500); //internal server error
+			responseJson.put("headers", headerJson);
+			responseJson.put("body", responseBody);
+		}
+        
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
+        writer.write(responseJson.toString());
+        writer.close();
+    }
 	
 	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
 		// TODO Auto-generated method stub

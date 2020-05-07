@@ -9,12 +9,14 @@ public class UserAdvisor {
 	private String notification;
 	private String name_low;
 	private String name_high;
+	private String department;
 	private int degree_types;
 	private int lead_status;
 	
-	public UserAdvisor(int id, String pName) {
+	public UserAdvisor(int id, String pName, String department) {
 		this.id = id;
 		this.pName = pName;
+		this.department = department;
 		this.notification = "day"; //hardcoded due to lack of info
 		this.name_low = "A"; //hardcoded due to lack of info
 		this.name_high = "Z"; //hardcoded due to lack of info
@@ -70,6 +72,14 @@ public class UserAdvisor {
 
 	public void setName_high(String name_high) {
 		this.name_high = name_high;
+	}
+	
+	public String getDepartment() {
+		return this.department;
+	}
+	
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 
 	public int getDegree_types() {
