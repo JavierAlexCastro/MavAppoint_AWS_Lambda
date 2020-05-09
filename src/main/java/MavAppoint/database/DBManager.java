@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Date;
 
+import MavAppoint.model.Appointment;
 import MavAppoint.model.User;
 import MavAppoint.model.UserAdvisor;
 import MavAppoint.model.UserStudent;
@@ -174,6 +175,79 @@ public class DBManager {
 		this.preparedStmt.setInt(1, id);
 		this.resultSet = this.preparedStmt.executeQuery();
 		return this.resultSet;
+	}
+	
+	public boolean insertAppointmentQuery(Appointment appointment) throws SQLException{
+		boolean success = false;
+		boolean rollback_success = true;
+		PreparedStatement insert_appt_type_stmt = null;
+	    PreparedStatement insert_appt_stmt = null;
+	    PreparedStatement update_schedule_stmt = null;
+	    
+	    String insert_appt_type_sql =
+	            "INSERT INTO `appointment_types` (userId, type, duration) VALUES (?,?,?)";
+
+	    String insert_appt_sql =
+	            "INSERT INTO `appointments` (advisor_userId, student_userId, date, start, end, type, description, studentId, student_email, student_cell)"
+	            + " VALUES (?,?,?,?,?,?,?,?,?,?)";
+	    
+	    String update_schedule_sql =
+	    		"UPDATE `advising_schedule` SET `studentId` = ? WHERE (`id` = ?);";
+	    
+	    try {
+	        this.conn.setAutoCommit(false);
+	        insert_appt_type_stmt = this.conn.prepareStatement(insert_appt_type_sql);
+	        insert_appt_stmt = this.conn.prepareStatement(insert_appt_sql);
+	        update_schedule_stmt = this.conn.prepareStatement(update_schedule_sql);
+
+	        insert_appt_type_stmt.setInt(1, appointment.getAdvisor().getId());
+	        insert_appt_type_stmt.setString(2, appointment.getType());
+	        insert_appt_type_stmt.setInt(3, appointment.getDuration());
+	        insert_appt_type_stmt.executeUpdate();
+	        
+	        Date sql_date = new Date(appointment.getDate().getTime()); //may give an error
+	        
+	        insert_appt_stmt.setInt(1, appointment.getAdvisor().getId());
+	        insert_appt_stmt.setInt(2, appointment.getStudent().getId());
+	        insert_appt_stmt.setDate(3, sql_date);
+	        insert_appt_stmt.setTime(4, appointment.getStart_time());
+	        insert_appt_stmt.setTime(5, appointment.getEnd_time());
+	        insert_appt_stmt.setString(6, appointment.getType());
+	        insert_appt_stmt.setString(7, appointment.getDescription());
+	        insert_appt_stmt.setString(8, appointment.getStudent().getStudent_id());
+	        insert_appt_stmt.setString(9, appointment.getUser().getEmail());
+	        insert_appt_stmt.setString(10,  appointment.getStudent().getPhone());
+            insert_appt_stmt.executeUpdate();
+            
+            int[] time_slots = appointment.getTime_slots();
+            for(int i = 0; i < time_slots.length; ++i) {
+            	update_schedule_stmt.setString(1, appointment.getStudent().getStudent_id());
+            	update_schedule_stmt.setInt(2, time_slots[i]);
+            	update_schedule_stmt.executeUpdate();
+            	this.conn.commit();
+            }
+            success = true;
+	    } catch (SQLException ex ) {
+	        success = false;
+	        if (this.conn != null) {
+	            try {
+	                this.conn.rollback();
+	                rollback_success = true;
+	            }catch(SQLException sql_ex) {
+	                rollback_success = false;
+	            }
+	        }
+	    } finally {
+	        if (insert_appt_type_stmt != null) {
+	        	insert_appt_type_stmt.close();
+	        }
+	        if (insert_appt_stmt != null) {
+	        	insert_appt_type_stmt.close();
+	        }
+	        this.conn.setAutoCommit(true);
+	    }
+	    
+	    return (success && rollback_success);
 	}
 	
 	public void closeConnection() throws SQLException {

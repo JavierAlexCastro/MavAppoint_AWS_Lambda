@@ -48,6 +48,9 @@ public class PostAdvisorController {
 	        			UserAdvisor advisor = new UserAdvisor(0, (String) event.get("name"), (String) event.get("department"));
 	        			//get user id --------------------------------
 	            		dbmgr.createStatement();
+	            		// Retrieving user ID based on email works because 'email' is UNIQUE in 'user' DB Table
+	            		// This implies if the same person wants to register as both student and advisor
+	            		//     then two different 'email' are required.
 	            		ResultSet resultSetUserId = dbmgr.getUserId(user.getEmail());
 	            		if(resultSetUserId.next()) {
 	            			advisor.setId(resultSetUserId.getInt("userId"));

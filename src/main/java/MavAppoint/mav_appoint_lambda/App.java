@@ -13,6 +13,7 @@ import MavAppoint.controller.GetDegreeController;
 import MavAppoint.controller.GetDepartmentController;
 import MavAppoint.controller.GetMajorController;
 import MavAppoint.controller.PostAdvisorController;
+import MavAppoint.controller.PostAppointmentController;
 import MavAppoint.controller.PostStudentController;
 import MavAppoint.controller.PostUserLoginController;
 
@@ -176,8 +177,8 @@ public class App implements RequestStreamHandler {
         
         try {
 			JSONObject event = (JSONObject) parser.parse(reader);
-			PostStudentController post_student_controller = new PostStudentController();
-			responseJson = post_student_controller.registerStudent(event);
+			PostAppointmentController post_appointment_controller = new PostAppointmentController();
+			responseJson = post_appointment_controller.registerStudent(event);
 		} catch (ParseException ex) {
 			headerJson.put("custom-header", "my custom header value");
 			responseBody.put("Error", ex.toString());

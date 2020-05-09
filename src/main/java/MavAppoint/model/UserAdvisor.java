@@ -33,6 +33,10 @@ public class UserAdvisor {
 		this.degree_types = resultSet.getInt("degree_types");
 		this.lead_status = resultSet.getInt("lead_status");
 	}
+	
+	public UserAdvisor(int id) {
+		this.id = id;
+	}
 
 	public int getId() {
 		return id;

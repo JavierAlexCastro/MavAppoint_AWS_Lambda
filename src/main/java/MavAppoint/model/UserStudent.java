@@ -26,6 +26,12 @@ public class UserStudent {
 		this.phone = resultSet.getString("phone_num");
 		this.last_name_initial = resultSet.getString("last_name_initial");
 	}
+	
+	public UserStudent(int id, String student_id, String phone) {
+		this.id = id;
+		this.student_id = student_id;
+		this.phone = phone;
+	}
 
 	public int getId() {
 		return id;

@@ -1,5 +1,7 @@
 package MavAppoint.util;
 
+import org.json.simple.JSONArray;
+
 public class Util {
 	
 	public static boolean validateEmail(String email){
@@ -15,7 +17,41 @@ public class Util {
 	}
 	
 	public static boolean validateName(String name) {
-		return name.matches("^[a-zA-Z. _-]{1,32}$");
+		return name.matches("^[a-zA-Z. _-]{1,32}$"); //potentially unneeded since using prepared statements
+	}
+	
+	public static boolean validateUserId(String id) {
+		return id.matches("^\\d+$");
+	}
+	
+	public static boolean validateAppType(String apptype) {
+		return apptype.matches("^[a-zA-Z0-9. _-]{1,45}$"); //potentially unneeded since using prepared statements
+	}
+	
+	public static boolean validateDuration(String duration) {
+		return duration.matches("^\\d+$");
+	}
+	
+	public static boolean validateDate(String date) {
+		return date.matches("^\\d{4}-\\d{1,2}-\\d{1,2}$");
+	}
+	
+	public static boolean validateTime(String time) {
+		return time.matches("^\\d{2}:\\d{2}:\\d{2}$");
+	}
+	
+	public static boolean validateDescription(String description) {
+		return description.matches("^[\\w.' ,-]{0,100}$"); //potentially unneeded since using prepared statements
+	}
+	
+	public static boolean validateTimeSlots(JSONArray time_slots) {
+		boolean result = true;
+		for(Object item: time_slots) {
+			if(!(item instanceof Long)) { //must be a number value
+				result = false;
+			}
+		}
+		return result;
 	}
 	
 	public static String addTime(String hour, String minute, int add){

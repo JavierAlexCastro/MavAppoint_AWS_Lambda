@@ -33,6 +33,11 @@ public class User {
 		this.notification = resultSet.getString("notification");
 	}
 	
+	public User(int id, String email) {
+		this.user_id = id;
+		this.email = email;
+	}
+	
 	public int getUser_id() {
 		return this.user_id;
 	}
