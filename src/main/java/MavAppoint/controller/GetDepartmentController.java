@@ -47,6 +47,10 @@ public class GetDepartmentController {
         return responseJson;
 	}
 	
+	//Parameters:
+	//	label: the key name for the department array
+	//	list: a list of department names
+	//	code: the status code for the response
 	//for success - returning a JSONArray
 	private JSONObject formResponse(String label, ArrayList<String> list, int code) {
 		JSONObject responseJson = new JSONObject();

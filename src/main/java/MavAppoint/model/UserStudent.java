@@ -11,8 +11,7 @@ public class UserStudent {
 	private String phone;
 	private String last_name_initial;
 	
-	public UserStudent(int id, String student_id, int degree_type, String phone, String last_name_initial) {
-		this.id = id;
+	public UserStudent(String student_id, int degree_type, String phone, String last_name_initial) {
 		this.student_id = student_id;
 		this.degree_type = degree_type;
 		this.phone = phone;

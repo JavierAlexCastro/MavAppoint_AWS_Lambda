@@ -36,7 +36,9 @@ public class PostUserLoginController {
 							//successful login
 							resultSetLogin.close();
 							//retrieve user -----------
-							ResultSet resultSetUser = dbmgr.getUserFromEmailQuery(login_email);
+							//maybe it is best to do this from the beginning instead of simply
+							//	retrieving the password and then retrieving the user
+							ResultSet resultSetUser = dbmgr.getUserFromEmailQuery(login_email); //email is unique attribute in DB so this works fine
 							if(resultSetUser.next()) {
 		            			User user = new User(resultSetUser);
 		            			resultSetUser.close();
@@ -52,7 +54,7 @@ public class PostUserLoginController {
 										dbmgr.closePreparedStatement();
 										dbmgr.closeConnection();
 		            				}else {
-		            					responseJson = formResponse("Error", "Query for retrieving student failed", 500); //internal server error
+		            					responseJson = formResponse("Error", "Query for retrieving student info failed", 500); //internal server error
 										dbmgr.closePreparedStatement();
 										dbmgr.closeConnection();
 		            				}
@@ -60,14 +62,15 @@ public class PostUserLoginController {
 		            			}else if(user.getRole().equals("advisor")) {
 		            				ResultSet resultSetAdvisor = dbmgr.getAdvisorFromIdQuery(user.getUser_id());
 		            				if(resultSetAdvisor.next()) {
-		            					UserAdvisor advisor = new UserAdvisor(resultSetAdvisor);
+		            					UserAdvisor advisor = new UserAdvisor();
+		            					advisor.populateAdvisorForLogin(resultSetAdvisor);
 		            					resultSetAdvisor.close();
 		            					
 		            					responseJson = formResponse(user, advisor, 200); //ok
 										dbmgr.closePreparedStatement();
 										dbmgr.closeConnection();
 		            				}else {
-		            					responseJson = formResponse("Error", "Query for retrieving advisor failed", 500); //internal server error
+		            					responseJson = formResponse("Error", "Query for retrieving advisor info failed", 500); //internal server error
 										dbmgr.closePreparedStatement();
 										dbmgr.closeConnection();
 		            				}

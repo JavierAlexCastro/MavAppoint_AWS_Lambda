@@ -28,8 +28,8 @@ public class GetMajorController {
         	ArrayList<Major> major_list = new ArrayList<Major>();
     		ArrayList<List<String>> major_and_dept_list = new ArrayList<List<String>>();
 
-    		while(resultSet.next()) {
-    			String[] inner_dept_array = {"", ""};
+    		while(resultSet.next()) { //iterate through majors
+    			String[] inner_dept_array = {"", ""}; //formatted as {major, department}
     			Department dept = new Department(resultSet.getString("dep_name"));
     			Major major = new Major(resultSet.getString("name"), dept);
     			inner_dept_array[0] = major.getName();
@@ -53,6 +53,10 @@ public class GetMajorController {
         return responseJson;
 	}
 	
+	//Parameters:
+	//	label: the key name for the major array
+	//	list: a list of [major, department] pairs
+	//	code: the status code for the response
 	//for success - returning a JSONArray
 	private JSONObject formResponse(String label, ArrayList<List<String>> list, int code) {
 		JSONObject responseJson = new JSONObject();

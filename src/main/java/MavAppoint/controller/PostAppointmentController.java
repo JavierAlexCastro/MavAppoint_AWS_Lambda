@@ -36,6 +36,9 @@ public class PostAppointmentController {
 		        				(String) event.get("date"), (String) event.get("start_time"), (String) event.get("end_time"),
 		        				(String) event.get("description"), user, advisor, student, (JSONArray) event.get("time_slots"));
 	        			
+	        			//before inserting it might be a good idea to also check if appointment.timeslots are available in the first place
+	        			//	that is, they don't have a studentId associated with them in the 'advising_schedule' table. Don't trust the user.
+	        			
 	        			//insert appointment --------------------------------
 		        		boolean insert_appointment_result = dbmgr.insertAppointmentQuery(appointment);
 		        		if(insert_appointment_result) {

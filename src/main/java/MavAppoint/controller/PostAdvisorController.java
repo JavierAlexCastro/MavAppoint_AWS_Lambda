@@ -2,6 +2,7 @@ package MavAppoint.controller;
 
 import java.sql.ResultSet;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -34,68 +35,26 @@ public class PostAdvisorController {
 		JSONObject responseJson = new JSONObject();
 		 try {
 			 if(checkRequestBody(event)) {
-				 if(Util.validateEmail((String) event.get("email")) && Util.validateName((String) event.get("name"))) {
+				 if(validateRequestBody(event)) {
 					User user = new User((String) event.get("email"), "advisor");
+					UserAdvisor advisor = new UserAdvisor((String) event.get("name"), (String) event.get("department"));
 		        	
 	        		DBManager dbmgr = DBManager.getInstance();
 	        		dbmgr.createConnection();
 	        		
-	        		//insert user --------------------------------
-	        		int insert_user_result = dbmgr.insertUserQuery(user);
-	        		if(insert_user_result > 0) {
-	        			dbmgr.closePreparedStatement();
-	        			
-	        			UserAdvisor advisor = new UserAdvisor(0, (String) event.get("name"), (String) event.get("department"));
-	        			//get user id --------------------------------
-	            		dbmgr.createStatement();
-	            		// Retrieving user ID based on email works because 'email' is UNIQUE in 'user' DB Table
-	            		// This implies if the same person wants to register as both student and advisor
-	            		//     then two different 'email' are required.
-	            		ResultSet resultSetUserId = dbmgr.getUserId(user.getEmail());
-	            		if(resultSetUserId.next()) {
-	            			advisor.setId(resultSetUserId.getInt("userId"));
-	            			dbmgr.closeResultSet();
-	            			dbmgr.closeStatement();
-	            			
-	            			//insert advisor --------------------------------
-	            			int insert_advisor_result = dbmgr.insertUserAdvisorQuery(advisor);
-	            			if(insert_advisor_result > 0) {
-	            				dbmgr.closePreparedStatement();
-	            				
-	            				//insert department user --------------------------------
-	            				int insert_dept_result = dbmgr.insertDepartmentUserQuery(advisor.getDepartment(), advisor.getId());
-	            				if(insert_dept_result > 0) {
-	            					dbmgr.closePreparedStatement();
-	            					dbmgr.closeConnection();
-	            					
-	            					//everything succeeded
-        							//send email with password --------------------------------
-        							//sendSDKEmail(user); //comment out when NAT Gateway disabled
-	            					responseJson = formResponse("Success", true, 200); //ok
-	            					
-	            				}else {
-	            					responseJson = formResponse("Error", "Query for department user insertion failed", 500); //internal server error
-	            					dbmgr.closePreparedStatement();
-	            					dbmgr.closeConnection();
-	            				}
-	            			}else {
-	            				responseJson = formResponse("Error", "Query for advisor insertion failed", 500); //internal server error
-	            				dbmgr.closePreparedStatement();
-	            				dbmgr.closeConnection();
-	            			}
-	            		}else {
-	            			responseJson = formResponse("Error", "Query for user id retrieval failed", 500); //internal server error
-	            			dbmgr.closeResultSet();
-	            			dbmgr.closeStatement();
-	            			dbmgr.closeConnection();
-	            		}
+	        		boolean insert_advisor_result = dbmgr.insertAdvisorQuery(user, advisor);
+	        		if(insert_advisor_result) {
+	        			dbmgr.closeConnection();
+    					//everything succeeded
+						//send email with password --------------------------------
+						//sendSDKEmail(user); //comment out when NAT Gateway disabled
+    					responseJson = formResponse("Success", true, 200); //ok
 	        		}else {
-	        			responseJson = formResponse("Error", "Query for user insertion failed", 500); //internal server error
-	        			dbmgr.closePreparedStatement();
+	        			responseJson = formResponse("Error", "Error registering advisor. DB error", 500); //internal server error
 	        			dbmgr.closeConnection();
 	        		}
 				 }else {
-					 responseJson = formResponse("Error", "Input validation failed, please check Email or Name fields", 400); //bad request
+					 responseJson = formResponse("Error", "Input validation failed, please use valid data", 400); //bad request
 				 }
 				 
 			 }else {
@@ -109,7 +68,18 @@ public class PostAdvisorController {
 	}
 	
 	private boolean checkRequestBody(JSONObject event) {
-		return (event.get("department") != null && event.get("name") != null && event.get("email") != null);
+		return (event.containsKey("department") && event.containsKey("name") && event.containsKey("email"));
+	}
+	
+	private boolean validateRequestBody(JSONObject event) {
+		return (
+				//check if 'department' is null first. If it is, fail because it shouldn't be. Otherwise validate
+				((event.get("department") == null) ? false:Util.validateDepartment((String) event.get("department")))
+				//check if 'name' is null first. If it is, fail because it shouldn't be. Otherwise validate.
+				&& ((event.get("name") == null) ? false:Util.validateName((String) event.get("name")))
+				//check if 'email' is null first. If it is, fail, because it shouldn't be. Otherwise validate
+				&& ((event.get("email") == null) ? false:Util.validateEmail((String) event.get("email")))
+				);
 	}
 	
 	//for errors - where msg is type String

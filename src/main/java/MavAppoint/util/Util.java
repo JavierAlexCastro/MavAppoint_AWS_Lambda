@@ -24,6 +24,22 @@ public class Util {
 		return id.matches("^\\d+$");
 	}
 	
+	public static boolean validateDepartment(String department) {
+		return department.matches("^[a-zA-Z. _-]{1,45}$");
+	}
+	
+	public static boolean validateDegree(String degree) {
+		return degree.matches("^[a-zA-Z. _-]{1,45}$");
+	}
+	
+	public static boolean validateMajor(String major) {
+		return major.matches("^[a-zA-Z. _-]{1,45}$");
+	}
+	
+	public static boolean validateInitial(String initial) {
+		return initial.matches("^[a-zA-Z]{1}$");
+	}
+	
 	public static boolean validateAppType(String apptype) {
 		return apptype.matches("^[a-zA-Z0-9. _-]{1,45}$"); //potentially unneeded since using prepared statements
 	}

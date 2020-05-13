@@ -29,49 +29,40 @@ public class GetAdvisingScheduleController {
 				dbmgr.createConnection();
 				
 	        	ResultSet resultSet = dbmgr.getAdvisingScheduleQuery(date);
-	        	ArrayList<AdvisingTimeSlot> advising_schedule = new ArrayList<AdvisingTimeSlot>();
-	        	ArrayList<UserAdvisor> advisor_list = new ArrayList<UserAdvisor>();
-	        	JSONArray advising_schedule_json = new JSONArray();
+	        	ArrayList<AdvisingTimeSlot> advising_schedule = new ArrayList<AdvisingTimeSlot>(); //list of time slots
+	        	ArrayList<UserAdvisor> advisor_list = new ArrayList<UserAdvisor>(); //list of advisors. No duplicates
+	        	JSONArray advising_schedule_json = new JSONArray(); //json formatted list of time slots. Includes advisor info
 	        	
-	        	while(resultSet.next()) {
-	        		JSONObject timeslot_json = new JSONObject();
-	        		AdvisingTimeSlot advising_time_slot = new AdvisingTimeSlot(resultSet);
+	        	while(resultSet.next()) { //iterate over each timeslot
+	        		JSONObject timeslot_json = new JSONObject(); //json formatted individual time slot
+	        		AdvisingTimeSlot advising_time_slot = new AdvisingTimeSlot(resultSet); //individual time slot
 	        		
-	        		JSONObject advisor_json = getAdvisorJSON(advisor_list, advising_time_slot.getUserId());
-	        		if(advisor_json.isEmpty()) {
-	        			ResultSet resultSetAdvisor = dbmgr.getAdvisorFromIdQuery(advising_time_slot.getUserId());
+	        		JSONObject advisor_json = getAdvisorJSON(advisor_list, advising_time_slot.getUserId()); //json formatted individual advisor
+	        		if(advisor_json.isEmpty()) { //if advisor is not in the list of unique advisors
+	        			ResultSet resultSetAdvisor = dbmgr.getAdvisorForTimeslotQuery(advising_time_slot.getUserId());
         				if(resultSetAdvisor.next()) {
         					UserAdvisor advisor = new UserAdvisor(resultSetAdvisor);
-        					//advisor_list.add(advisor);
-        					//advisor_json = populateAdvisorJSON(advisor);
-        					ResultSet resultSetAdvisorDept = dbmgr.getAdvisorDepartmentQuery(advising_time_slot.getUserId());
-            				if(resultSetAdvisorDept.next()) {
-            					advisor.setDepartment(resultSetAdvisorDept.getString("name"));
-            					advisor_list.add(advisor);
-            					advisor_json = populateAdvisorJSON(advisor);
-            				}else {
-            					responseJson = formResponse("Error", "Query for retrieving advisor department failed", 500); //internal server error
-    							dbmgr.closePreparedStatement();
-    							dbmgr.closeConnection();
-    							break;
-            				}
+        					advisor_list.add(advisor); //add to list of advisors
+        					advisor_json = populateAdvisorJSON(advisor); //populate json object with advisor info
         				}else {
-        					responseJson = formResponse("Error", "Query for retrieving advisor failed", 500); //internal server error
+        					responseJson = formResponse("Error", "Query for retrieving advisor info failed", 500); //internal server error
 							dbmgr.closePreparedStatement();
 							dbmgr.closeConnection();
 							break;
         				}
 	        		}
 	        		
+	        		//populate json object with time slot and advisor info
 	        		timeslot_json.put("id", advising_time_slot.getId());
 	        		timeslot_json.put("advisor", advisor_json);
 	        		timeslot_json.put("date", advising_time_slot.getDate());
 	        		timeslot_json.put("start", advising_time_slot.getTime_start());
 	        		timeslot_json.put("end", advising_time_slot.getTime_end());
 	        		timeslot_json.put("studentId", advising_time_slot.getStudent_id());
-	        		advising_schedule.add(advising_time_slot);
-	        		advising_schedule_json.add(timeslot_json);
+	        		advising_schedule.add(advising_time_slot); //add to list
+	        		advising_schedule_json.add(timeslot_json); //add to json object
 	        	}
+	        	
 	        	if(advising_schedule.isEmpty()) {
 	    			responseJson = formResponse("Error", "No advising schedule for specified date in DB", 204); //no content
 	    		}else {
@@ -90,6 +81,8 @@ public class GetAdvisingScheduleController {
 		return responseJson;
 	}
 	
+	//Parameters:
+	//	advisor: a UserAdvisor object to extract it's info
 	//populates JSONObject with advisor info
 	private JSONObject populateAdvisorJSON(UserAdvisor advisor) {
 		JSONObject advisor_json = new JSONObject();
@@ -101,14 +94,17 @@ public class GetAdvisingScheduleController {
 		return advisor_json;
 	}
 	
+	//Parameters:
+	//	list: a list with all unique advisors. Initially empty
+	//	id: the id of an advisor
 	//returns JSONObject with Advisor info - empty if advisor not in list
 	private JSONObject getAdvisorJSON(ArrayList<UserAdvisor> list, int id) {
 		JSONObject advisor_json = new JSONObject();
 		if(list.isEmpty()) {
 			return advisor_json;
 		}
-		for(UserAdvisor advisor: list) {
-			if(advisor.getId() == id) {
+		for(UserAdvisor advisor: list) { //iterate over unique advisors
+			if(advisor.getId() == id) { //if the advisor is already on the list, populate the json formatted advisor
 				advisor_json.put("id", advisor.getId());
 				advisor_json.put("name", advisor.getpName());
 				advisor_json.put("degree_types", advisor.getDegree_types());
@@ -120,6 +116,7 @@ public class GetAdvisingScheduleController {
 		return advisor_json;
 	}
 			
+	//check if key is in body and make sure it's not null 
 	private boolean checkRequestBody(JSONObject event) {
 		return (event.get("date") != null);
 	}

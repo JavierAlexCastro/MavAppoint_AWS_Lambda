@@ -13,8 +13,15 @@ public class UserAdvisor {
 	private int degree_types;
 	private int lead_status;
 	
-	public UserAdvisor(int id, String pName, String department) {
-		this.id = id;
+	public UserAdvisor() {
+		this.notification = "day"; //hardcoded due to lack of info
+		this.name_low = "A"; //hardcoded due to lack of info
+		this.name_high = "Z"; //hardcoded due to lack of info
+		this.degree_types = 7; //hardcoded due to lack of info
+		this.lead_status = 1; //hardcoded due to lack of info
+	}
+	
+	public UserAdvisor(String pName, String department) {
 		this.pName = pName;
 		this.department = department;
 		this.notification = "day"; //hardcoded due to lack of info
@@ -32,6 +39,7 @@ public class UserAdvisor {
 		this.name_high = resultSet.getString("name_high");
 		this.degree_types = resultSet.getInt("degree_types");
 		this.lead_status = resultSet.getInt("lead_status");
+		this.department = resultSet.getString("name"); //department name
 	}
 	
 	public UserAdvisor(int id) {
@@ -102,6 +110,14 @@ public class UserAdvisor {
 		this.lead_status = lead_status;
 	}
 	
-	
+	public void populateAdvisorForLogin(ResultSet resultSet) throws SQLException {
+		this.id = resultSet.getInt("userId");
+		this.pName = resultSet.getString("pName");
+		this.notification = resultSet.getString("notification");
+		this.name_low = resultSet.getString("name_low");
+		this.name_high = resultSet.getString("name_high");
+		this.degree_types = resultSet.getInt("degree_types");
+		this.lead_status = resultSet.getInt("lead_status");
+	}
 
 }

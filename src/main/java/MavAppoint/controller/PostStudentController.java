@@ -2,6 +2,7 @@ package MavAppoint.controller;
 
 import java.sql.ResultSet;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -36,90 +37,29 @@ public class PostStudentController {
         try {
         	if(checkRequestBody(event)) {
         		
-        		if(Util.validateEmail((String) event.get("email")) && Util.validatePhoneNumber((String) event.get("phone")) && Util.validateStudentId((String) event.get("student_id"))) {
+        		if(validateRequestBody(event)) {
 	        		User user = new User((String) event.get("email"), "student");
+	        		String degree = (String) event.get("degree");
+            		int degree_type = getDegreeType(degree);
+	        		UserStudent student = new UserStudent((String)event.get("student_id"), degree_type, (String)event.get("phone"), (String)event.get("initial"));
 	        		
 	        		DBManager dbmgr = DBManager.getInstance();
 	        		dbmgr.createConnection();
 	        		
-	        		//insert user --------------------------------
-	        		int insert_user_result = dbmgr.insertUserQuery(user);
-	        		if(insert_user_result > 0) {
-	        			dbmgr.closePreparedStatement();
-	        			String degree = (String) event.get("degree");
-	            		int degree_type = getDegreeType(degree);
-	            		UserStudent student = new UserStudent(0,(String)event.get("student_id"), degree_type, (String)event.get("phone"), (String)event.get("initial"));
-	            		
-	            		//get user id --------------------------------
-	            		dbmgr.createStatement();
-	            		// Retrieving user ID based on email works because 'email' is UNIQUE in 'user' DB Table
-	            		// This implies if the same person wants to register as both student and advisor
-	            		//     then two different 'email' are required.
-	            		ResultSet resultSetUserId = dbmgr.getUserId(user.getEmail());
-	            		if(resultSetUserId.next()) {
-	            			student.setId(resultSetUserId.getInt("userId"));
-	            			dbmgr.closeResultSet();
-	            			dbmgr.closeStatement();
-	            			
-	            			//insert student --------------------------------
-	            			int insert_student_result = dbmgr.insertUserStudentQuery(student);
-	            			if(insert_student_result > 0) {
-	            				dbmgr.closePreparedStatement();
-	            				
-	            				//insert department user --------------------------------
-	            				int insert_dept_result = dbmgr.insertDepartmentUserQuery((String) event.get("department"), student.getId());
-	            				if(insert_dept_result > 0) {
-	            					dbmgr.closePreparedStatement();
-	            					
-	            					//insert degree user --------------------------------
-	            					int insert_degree_result = dbmgr.insertDegreeTypeUserQuery(degree, student.getId());
-	            					if(insert_degree_result > 0) {
-	            						dbmgr.closePreparedStatement();
-	            						
-	            						//insert major user --------------------------------
-	            						int insert_major_result = dbmgr.insertMajorUserQuery((String) event.get("major"), student.getId());
-	            						if(insert_major_result > 0) {
-	            							dbmgr.closePreparedStatement();
-	            							dbmgr.closeConnection();
+	        		boolean insert_student_result = dbmgr.insertStudentQuery(user, student, (String) event.get("department"), degree, (String) event.get("major"));
+	        		if(insert_student_result) {
+	        			dbmgr.closeConnection();
+    					//everything succeeded
+						//send email with password --------------------------------
+						//sendSDKEmail(user); //comment out when NAT Gateway disabled
+    					responseJson = formResponse("Success", true, 200); //ok
 	            							
-	            							//everything succeeded
-	            							//send email with password --------------------------------
-	            							//sendSDKEmail(user); //comment out when NAT Gateway disabled
-	            							responseJson = formResponse("Success", true, 200); //ok
-	            							
-	            						}else {
-	            							responseJson = formResponse("Error", "Query for major user insertion failed", 500); //internal server error
-	            							dbmgr.closePreparedStatement();
-	                    					dbmgr.closeConnection();
-	            						}
-	            					}else {
-	            						responseJson = formResponse("Error", "Query for degree type user insertion failed", 500); //internal server error
-	            						dbmgr.closePreparedStatement();
-	                					dbmgr.closeConnection();
-	            					}
-	            				}else {
-	            					responseJson = formResponse("Error", "Query for department user insertion failed", 500); //internal server error
-	            					dbmgr.closePreparedStatement();
-	            					dbmgr.closeConnection();
-	            				}
-	            			}else {
-	            				responseJson = formResponse("Error", "Query for student insertion failed", 500); //internal server error
-	            				dbmgr.closePreparedStatement();
-	            				dbmgr.closeConnection();
-	            			}
-	            		}else {
-	            			responseJson = formResponse("Error", "Query for user id retrieval failed", 500); //internal server error
-	            			dbmgr.closeResultSet();
-	            			dbmgr.closeStatement();
-	            			dbmgr.closeConnection();
-	            		}
 	        		}else {
-	        			responseJson = formResponse("Error", "Query for user insertion failed", 500); //internal server error
-	        			dbmgr.closePreparedStatement();
+	        			responseJson = formResponse("Error", "Error registering student. DB error", 500); //internal server error
 	        			dbmgr.closeConnection();
 	        		}
 	        	}else {
-	        		responseJson = formResponse("Error", "Input validation failed, please check Email, Phone or ID", 400); //bad request
+	        		responseJson = formResponse("Error", "Input validation failed, please use valid data", 400); //bad request
 	        	}
         	}else {
         		responseJson = formResponse("Error", "Expected request body arguments not found", 400); //bad request
@@ -133,9 +73,28 @@ public class PostStudentController {
 	}
 	
 	private boolean checkRequestBody(JSONObject event) {
-		return (event.get("department") != null && event.get("degree") != null && event.get("major") != null && event.get("initial") != null
-        			&& event.get("student_id") != null && event.get("phone") != null && event.get("email") != null);
+		return (event.containsKey("department") && event.containsKey("degree") && event.containsKey("major") && event.containsKey("initial")
+        			&& event.containsKey("student_id") && event.containsKey("phone") && event.containsKey("email") );
 		
+	}
+	
+	private boolean validateRequestBody(JSONObject event) {
+		return (
+				//check if 'department' is null first. If it is, fail because it shouldn't be. Otherwise validate.
+				((event.get("department") == null) ? false:Util.validateDepartment((String) event.get("department")))
+				//check if 'degree' is null first. If it is, fail because it shouldn't be. Otherwise validate.
+				&& ((event.get("degree") == null) ? false:Util.validateDegree((String)event.get("degree")))
+				//check if 'major' is null first. If it is, fail because it shouldn't be. Otherwise validate.
+				&& ((event.get("major") == null) ? false:Util.validateMajor((String) event.get("major")))
+				//check if 'initial' is null first. If it is, fail because it shouldn't be. Otherwise validate.
+				&& ((event.get("initial") == null) ? false:Util.validateInitial((String) event.get("initial")))
+				//check if 'student_id' is null first. If it is, fail because it shouldn't be. Otherwise validate.
+				&& ((event.get("student_id") == null) ? false:Util.validateStudentId((String)event.get("student_id")))
+				//check if 'phone' is null first. If it is, fail because it shouldn't be. Otherwise validate.
+				&& ((event.get("phone") == null) ? false:Util.validatePhoneNumber((String)event.get("phone")))
+				//check if 'email' is null first. If it is, fail because it shouldn't be. Otherwise validate.
+				&& ((event.get("email") == null) ? false:Util.validateEmail((String)event.get("email")))
+				);
 	}
 	
 	//for errors - where msg is type String
@@ -229,24 +188,17 @@ public class PostStudentController {
 //		String email_subject = "MavAppoint New Account Info";
 //	    String email_body = String.join(
 //	    	    System.getProperty("line.separator"),
-//	    	    "<html>",
-//                "<head></head>",
-//                "<body>",
-//                "<h3>Hello UTA student,</h3>",
-//                "<p>You recently created a MavAppoint account. <br /> ",
-//                "Here is your randomly generated password: <br />",
-//                "<br />",
-//                user.getPassword(),
-//                "<br />",
-//                "<br />",
-//                "The University of Texas at Arlington",
-//                "<br />",
-//                "MavAppoint System",
-//                "<ber />",
-//                "This message was sent automatically by Amazon's Simple Email Service",
-//                "</p>",
-//                "</body>",
-//                "</html>"
+//	    	    "Hello UTA student,",
+//   			" ",
+//    			"You recently created a MavAppoint account.",
+//    			"Here is your randomly generated password:",
+//    			" ",
+//    			user.getPassword(),
+//    			" ",
+//    			"This message was sent automatically by Amazon's Simple Email Service",
+//    			" ",
+//    			"The University of Texas at Arlington",
+//    			"MavAppoint System"
 //	    	);
 //	    // Create a Properties object to contain connection configuration information.
 //	    Properties props = System.getProperties();

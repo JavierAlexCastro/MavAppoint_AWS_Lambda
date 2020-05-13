@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class AdvisingTimeSlot {
 	private int id;
-	private int userId;
+	private int userId; //advisor's id
 	private Date date;
 	private Time time_start;
 	private Time time_end;
